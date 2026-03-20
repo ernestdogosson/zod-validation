@@ -21,7 +21,7 @@ const randomUserSchema = z.object({
       location: z.object({
         country: z.string(),
       }),
-    })
+    }),
   ),
 });
 
@@ -49,4 +49,20 @@ app.get("/random-person", async (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// POST /users
+const userSchema = z.object({
+  name: z.string().min(3).max(12),
+  age: z.number().min(18).max(100).optional().default(28),
+  email: z.string().regex(/^[\w.-]+@[\w.-]+\.\w+$/).toLowerCase(),
+});
+
+app.post("/users", (req, res) => {
+  const result = userSchema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: result.error.issues });
+    return;
+  }
+  res.status(201).json(result.data);
 });
